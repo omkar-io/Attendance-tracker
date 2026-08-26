@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Ledger — Attendance Register</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%231D2B3A%22/><text x=%2250%22 y=%2266%22 font-size=%2255%22 text-anchor=%22middle%22 fill=%22%23FAF7F0%22 font-family=%22Georgia%22>L</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<div class="stamp-layer" id="stampLayer"></div>
+
+<!-- AUTH SCREEN -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <div class="brand auth-brand">
+      <span class="brand-mark">L</span>
+      <div class="brand-text">
+        <h1>The Ledger</h1>
+        <p>subject-wise attendance register</p>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-authtab="login">Log in</button>
+      <button class="auth-tab" data-authtab="signup">Sign up</button>
+    </div>
+
+    <form id="authForm" class="auth-form">
+      <div class="field-row" id="usernameRow" hidden>
+        <label for="authUsername">Display name</label>
+        <input type="text" id="authUsername" placeholder="What should we call you?" autocomplete="nickname">
+        <p class="field-hint">Shown in the header. Login itself still uses your email — Supabase authenticates by email, not username.</p>
+      </div>
+      <div class="field-row">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="field-row">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Log in</button>
+    </form>
+    <p class="auth-status" id="authStatus"></p>
+    <p class="auth-note">Your subjects, records, and settings are stored in your own Supabase project and are only visible to your account.</p>
+  </div>
+</div>
+
+<!-- APP (hidden until logged in) -->
+<div id="appShell" hidden>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <div class="brand-text">
+        <h1>The Ledger</h1>
+        <p>subject-wise attendance register</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="dashboard">Register</button>
+      <button class="tab" data-tab="calendar">Calendar</button>
+      <button class="tab" data-tab="log">Activity Log</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+    <div class="account-chip">
+      <span id="accountName">—</span>
+      <button class="btn btn-ghost btn-small" id="btnLogout">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="ledger-summary" id="ledgerSummary">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="section-heading">
+      <h2>Subjects</h2>
+      <button class="btn btn-primary" id="btnAddSubject">+ Add subject</button>
+    </div>
+
+    <div class="subject-grid" id="subjectGrid">
+      <!-- subject cards injected here -->
+    </div>
+
+    <div class="empty-state" id="emptyState" hidden>
+      <p class="empty-eyebrow">Blank register</p>
+      <h3>No subjects yet</h3>
+      <p>Add your first subject to start tracking classes, misses, and your safety margin.</p>
+      <button class="btn btn-primary" id="btnAddSubjectEmpty">+ Add your first subject</button>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="view" id="view-calendar">
+    <div class="section-heading">
+      <h2>Calendar</h2>
+      <div class="calendar-controls">
+        <select id="calSubjectSelect"></select>
+        <div class="month-nav">
+          <button id="calPrev" class="icon-btn" aria-label="Previous month">‹</button>
+          <span id="calLabel" class="month-label">—</span>
+          <button id="calNext" class="icon-btn" aria-label="Next month">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="calendar-legend">
+      <span><i class="dot dot-present"></i> Present</span>
+      <span><i class="dot dot-absent"></i> Absent</span>
+      <span><i class="dot dot-mixed"></i> Mixed day</span>
+      <span><i class="dot dot-none"></i> No class</span>
+    </div>
+    <div class="calendar-grid" id="calendarWeekdays"></div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </section>
+
+  <!-- ACTIVITY LOG -->
+  <section class="view" id="view-log">
+    <div class="section-heading">
+      <h2>Activity Log</h2>
+      <button class="btn btn-ghost" id="btnClearLog">Clear log</button>
+    </div>
+    <ol class="log-list" id="logList"></ol>
+    <div class="empty-state" id="logEmpty" hidden>
+      <p class="empty-eyebrow">Quiet page</p>
+      <h3>Nothing logged yet</h3>
+      <p>Every mark, edit, and message will show up here, newest first.</p>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="view-settings">
+    <div class="section-heading">
+      <h2>Settings</h2>
+    </div>
+
+    <div class="settings-card">
+      <h3>Telegram notifications</h3>
+      <p class="settings-copy">Get a message the moment you mark yourself present in a subject. Create a bot with <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a>, then message <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> to find your chat ID.</p>
+
+      <div class="field-row">
+        <label for="tgToken">Bot token</label>
+        <input type="password" id="tgToken" placeholder="123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+      </div>
+      <div class="field-row">
+        <label for="tgChatId">Chat ID</label>
+        <input type="text" id="tgChatId" placeholder="e.g. 987654321">
+      </div>
+      <div class="field-row checkbox-row">
+        <label for="tgEnabled"><input type="checkbox" id="tgEnabled"> Send a message when I mark myself present</label>
+      </div>
+      <div class="field-row checkbox-row">
+        <label for="tgEnabledAbsent"><input type="checkbox" id="tgEnabledAbsent"> Also message me when I mark myself absent</label>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-primary" id="btnSaveTelegram">Save settings</button>
+        <button class="btn btn-ghost" id="btnTestTelegram">Send test message</button>
+      </div>
+      <p class="settings-note">Your token stays in this browser's storage only — it is never written to any file, so it's safe to keep this site's code on a public GitHub repo.</p>
+      <p class="settings-status" id="tgStatus"></p>
+    </div>
+
+    <div class="settings-card">
+      <h3>Default attendance target</h3>
+      <p class="settings-copy">Used for new subjects unless you set one specifically.</p>
+      <div class="field-row">
+        <label for="defaultPercent">Required percentage</label>
+        <input type="number" id="defaultPercent" min="1" max="100" value="75">
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-primary" id="btnSaveDefault">Save</button>
+      </div>
+    </div>
+
+    <div class="settings-card danger">
+      <h3>Reset everything</h3>
+      <p class="settings-copy">Deletes all subjects, records, and logs from this browser. This cannot be undone.</p>
+      <div class="settings-actions">
+        <button class="btn btn-danger" id="btnResetAll">Erase all data</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- SUBJECT MODAL -->
+<div class="modal-backdrop" id="subjectModalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="subjectModalTitle">Add subject</h3>
+    <div class="field-row">
+      <label for="subjectName">Subject name</label>
+      <input type="text" id="subjectName" placeholder="e.g. Thermodynamics">
+    </div>
+    <div class="field-row">
+      <label for="subjectPercent">Required attendance %</label>
+      <input type="number" id="subjectPercent" min="1" max="100" value="75">
+    </div>
+    <div class="field-row">
+      <label for="subjectColor">Ledger color</label>
+      <div class="color-swatches" id="colorSwatches"></div>
+    </div>
+    <div class="field-row">
+      <label for="subjectPast">Already attended some? (optional, sets a starting count)</label>
+      <div class="two-col">
+        <input type="number" id="subjectAttended" min="0" placeholder="Classes attended">
+        <input type="number" id="subjectTotal" min="0" placeholder="Classes held">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnCancelSubject">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveSubject">Save subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- MARK MODAL -->
+<div class="modal-backdrop" id="markModalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="markModalTitle">Mark attendance</h3>
+    <div class="field-row">
+      <label for="markDate">Date</label>
+      <input type="date" id="markDate">
+    </div>
+    <div class="mark-choice">
+      <button class="mark-btn mark-present" id="markPresentBtn">✓ Present</button>
+      <button class="mark-btn mark-absent" id="markAbsentBtn">✕ Absent</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnCancelMark">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /appShell -->
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
