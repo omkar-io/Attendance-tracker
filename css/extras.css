@@ -40,3 +40,15 @@
 [data-theme="dark"] .settings-card.danger { border-color: #6b3a34; }
 [data-theme="dark"] .btn-primary { background: var(--ink); color: var(--paper); }
 [data-theme="dark"] .btn-primary:hover { background: #fff; }
+
+/* Bottom bar: same rounded pill as the old top tabs, floating at the bottom */
+@media (max-width: 720px) {
+  .tabs {
+    left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
+    border: 1px solid var(--rule-strong); border-radius: 14px; padding: 4px; gap: 4px;
+    background: var(--paper-raised);
+    box-shadow: 0 8px 24px -8px rgba(29,43,58,.35), 0 1px 2px rgba(29,43,58,.12);
+  }
+  .tab { border-radius: 10px; padding: 11px 2px; font-size: 12.5px; }
+  body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+}
