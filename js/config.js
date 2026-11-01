@@ -9,3 +9,6 @@
 
 const SUPABASE_URL = "https://xvixhvkurxcfrxstrayx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2aXhodmt1cnhjZnJ4c3RyYXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjAyMDgsImV4cCI6MjEwMzI5NjIwOH0.Y_TP-M3EuP-4aT5qcQb67ZTEzD5ecTYG7i1w_xA9uuI";
+
+// Public key from: npx web-push generate-vapid-keys  (the PRIVATE key never goes here)
+const VAPID_PUBLIC_KEY = "BFsEBDVCkVrmMisnFjNKxuWuR89i8lbHqDX9QIugcJDcy-ahJyiQcwtjiE5uu3ZKc0792WqY7F5SkDZhCHyK5WE";
