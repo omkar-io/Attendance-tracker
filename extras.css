@@ -1,0 +1,27 @@
+/* Dark mode: same ledger, ink-on-night */
+[data-theme="dark"] {
+  --paper:#12171E; --paper-raised:#1B222C; --rule:#27303C; --rule-strong:#364252;
+  --ink:#ECE8DD; --ink-soft:#A9B2BE; --ink-faint:#7C8794;
+  --present:#5FB286; --present-soft:#1E3329; --absent:#E0675A; --absent-soft:#3A1F1C;
+  --amber:#E0A94A; --amber-soft:#3A2F1A; --shadow-card:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+[data-theme="dark"] .topbar { background: rgba(18,23,30,.92); }
+[data-theme="dark"] .brand-mark, [data-theme="dark"] .auth-tab.active { background: var(--ink); color: var(--paper); }
+.theme-btn { border:1px solid var(--rule-strong); background:var(--paper-raised); color:var(--ink); border-radius:8px; width:34px; height:30px; cursor:pointer; font-size:15px; }
+.subject-card { transition: transform .15s, box-shadow .15s; }
+.subject-card:hover { transform: translateY(-2px); }
+.btn:focus-visible,.tab:focus-visible,.theme-btn:focus-visible,input:focus-visible { outline:2px solid var(--amber); outline-offset:2px; }
+.install-hint { font-size:12.5px; color:var(--ink-soft); background:var(--amber-soft); border-radius:8px; padding:10px 12px; margin:0 0 12px; }
+
+/* Phones: bottom tab bar like a native app */
+@media (max-width: 720px) {
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .topbar-inner { padding: 10px 14px; gap: 10px; flex-wrap: nowrap; }
+  .brand-text p, .account-chip span { display: none; }
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; border-radius: 0; border-width: 1.5px 0 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); justify-content: space-around; background: var(--paper-raised); }
+  .tab { flex: 1; padding: 12px 4px; font-size: 12.5px; text-align: center; }
+  .app-main { padding-left: 14px; padding-right: 14px; }
+  .btn { min-height: 44px; }
+  .mark-btn { min-height: 56px; }
+}
