@@ -25,3 +25,18 @@
   .btn { min-height: 44px; }
   .mark-btn { min-height: 56px; }
 }
+
+/* Fix 1: backdrop-filter on .topbar trapped the fixed bottom tabs inside the header */
+@media (max-width: 720px) { .topbar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--paper); } }
+
+/* Fix 2: hard-coded dark text colours were unreadable on dark backgrounds */
+[data-theme="dark"] .margin-line.can-miss,
+[data-theme="dark"] .day-cell.present,
+[data-theme="dark"] .mark-present:hover { color: #9be0bb; }
+[data-theme="dark"] .margin-line.must-attend,
+[data-theme="dark"] .day-cell.absent,
+[data-theme="dark"] .mark-absent:hover { color: #ffb4aa; }
+[data-theme="dark"] .day-cell.mixed { color: #f0c878; }
+[data-theme="dark"] .settings-card.danger { border-color: #6b3a34; }
+[data-theme="dark"] .btn-primary { background: var(--ink); color: var(--paper); }
+[data-theme="dark"] .btn-primary:hover { background: #fff; }
